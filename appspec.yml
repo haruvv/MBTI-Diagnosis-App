@@ -1,16 +1,14 @@
 version: 0.0
 os: linux
 files:
-  - source: /
+  - source: /MBTI-Diagnosis-App
     destination: /var/www/MBTI-Diagnosis-App
-  - source: /public
-    destination: /var/www/html/MBTI-Diagnosis-App
 hooks:
   BeforeInstall:
-    - location: scripts/before_install.sh
+    - location: /var/www/MBTI-Diagnosis-App/cripts/before_install.sh
       timeout: 300
       runas: root
   AfterInstall:
-    - location: scripts/after_install.sh
+    - location: /var/www/MBTI-Diagnosis-App/scripts/after_install.sh
       timeout: 300
       runas: root

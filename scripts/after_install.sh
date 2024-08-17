@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /var/www/MBTI-Diagnosis-App/backend
+cd /var/www/MBTI-Diagnosis-App
 
 # Composerの依存関係をインストール
 composer install --no-interaction --no-dev --prefer-dist
