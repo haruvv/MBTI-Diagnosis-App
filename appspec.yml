@@ -3,6 +3,8 @@ os: linux
 files:
   - source: /
     destination: /var/www/MBTI-Diagnosis-App
+  - source: /public
+    destination: /var/www/html/MBTI-Diagnosis-App
 hooks:
   BeforeInstall:
     - location: scripts/before_install.sh
