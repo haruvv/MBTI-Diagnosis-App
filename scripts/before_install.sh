@@ -5,5 +5,5 @@ if [ -d "/var/www/MBTI-Diagnosis-App" ]; then
 fi
 
 # デプロイ先ディレクトリの作成
-sudo mkdir -p /var/www/MBTI-Diagnosis-App
-sudo chown -R ec2-user:ec2-user /var/www/MBTI-Diagnosis-App
+# sudo mkdir -p /var/www/MBTI-Diagnosis-App
+# sudo chown -R ec2-user:ec2-user /var/www/MBTI-Diagnosis-App
