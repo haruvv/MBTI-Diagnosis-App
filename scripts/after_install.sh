@@ -8,13 +8,9 @@ mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
 
-# ここにその他の設定やコマンドを続けます
-
-
-# 必要なディレクトリを作成し、権限を設定
-mkdir -p bootstrap/cache
-chmod -R 775 storage bootstrap/cache
+# 必要なディレクトリとファイルに権限を設定
 chown -R www-data:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
 
 # COMPOSER_ALLOW_SUPERUSERを設定してComposerを実行
 export COMPOSER_ALLOW_SUPERUSER=1
