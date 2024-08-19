@@ -43,5 +43,5 @@ jobs:
         run: |
           aws deploy create-deployment \
             --application-name MBTI-App \
-            --deployment-group-name production \
+            --deployment-group-name MBTI-Deploy-Group \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
