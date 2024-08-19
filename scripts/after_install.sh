@@ -6,11 +6,17 @@ cd /var/www/MBTI-Diagnosis-App
 # 必要なディレクトリを作成し、権限を設定
 mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache
+chown -R nginx:nginx storage bootstrap/cache
 
 # 必要なディレクトリとファイルに権限を設定
-chown -R www-data:www-data storage bootstrap/cache
+chown -R nginx:nginx storage bootstrap/cache
 chmod -R 775 storage bootstrap/cache
+
+sudo chown -R nginx:nginx /var/www/MBTI-Diagnosis-App/storage/logs
+sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/storage/logs
+
+sudo chown -R nginx:nginx /var/www/MBTI-Diagnosis-App/database
+sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/database
 
 # COMPOSER_ALLOW_SUPERUSERを設定してComposerを実行
 export COMPOSER_ALLOW_SUPERUSER=1
@@ -28,10 +34,6 @@ php artisan config:clear
 php artisan cache:clear
 php artisan route:clear
 php artisan view:clear
-
-# ストレージディレクトリのパーミッション設定
-chmod -R 775 storage bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache
 
 # シンボリックリンクの作成
 php artisan storage:link

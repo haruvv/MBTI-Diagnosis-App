@@ -19,6 +19,10 @@ jobs:
       - name: Install Composer Dependencies
         run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
+      - name: Create ENV file
+        run: |
+          echo "${{ secrets.PROD_ENV }}" > .env
+
       - name: Ensure bootstrap/cache directory exists
         run: mkdir -p bootstrap/cache
 
