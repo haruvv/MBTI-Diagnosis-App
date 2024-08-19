@@ -1,7 +1,15 @@
 #!/bin/bash
 
-# デプロイ先ディレクトリに移動
+# デプロイディレクトリに移動
 cd /var/www/MBTI-Diagnosis-App
+
+# 必要なディレクトリを作成し、権限を設定
+mkdir -p bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
+
+# ここにその他の設定やコマンドを続けます
+
 
 # 必要なディレクトリを作成し、権限を設定
 mkdir -p bootstrap/cache
