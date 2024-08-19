@@ -1,15 +1,16 @@
 version: 0.0
 os: linux
+
 files:
-  - source: /
+  - source: /MBTI-Diagnosis-App
     destination: /var/www/MBTI-Diagnosis-App
-    overwrite: true
+
 hooks:
   BeforeInstall:
     - location: scripts/before_install.sh
       timeout: 300
-      runas: root
+      runas: ec2-user
   AfterInstall:
     - location: scripts/after_install.sh
       timeout: 300
-      runas: root
+      runas: ec2-user
