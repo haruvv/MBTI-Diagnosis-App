@@ -5,10 +5,10 @@ files:
     destination: /var/www/MBTI-Diagnosis-App
 hooks:
   BeforeInstall:
-    - location: /var/www/MBTI-Diagnosis-App/scripts/before_install.sh
+    - location: scripts/before_install.sh
       timeout: 300
       runas: root
   AfterInstall:
-    - location: /var/www/MBTI-Diagnosis-App/scripts/after_install.sh
+    - location: scripts/after_install.sh
       timeout: 300
       runas: root
