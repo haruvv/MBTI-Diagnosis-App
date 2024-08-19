@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 
 files:
-  - source: /MBTI-Diagnosis-App
+  - source: /
     destination: /var/www/MBTI-Diagnosis-App
 
 hooks:
