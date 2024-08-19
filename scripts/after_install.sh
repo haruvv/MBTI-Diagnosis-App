@@ -1,7 +1,15 @@
 #!/bin/bash
+
+# デプロイ先ディレクトリに移動
 cd /var/www/MBTI-Diagnosis-App
 
-# Composerの依存関係をインストール
+# 必要なディレクトリを作成し、権限を設定
+mkdir -p bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
+
+# COMPOSER_ALLOW_SUPERUSERを設定してComposerを実行
+export COMPOSER_ALLOW_SUPERUSER=1
 composer install --no-interaction --no-dev --prefer-dist
 
 # 環境設定
@@ -36,5 +44,5 @@ php artisan view:cache
 # Composerのオートロードを最適化
 composer dump-autoload --optimize
 
-# アプリケーション全体の最適化（上記のコマンドを含む）
+# アプリケーション全体の最適化
 php artisan optimize
