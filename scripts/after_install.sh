@@ -34,7 +34,6 @@ php artisan route:clear
 # キャッシュのリロード
 php artisan config:cache
 php artisan route:cache
-php artisan view:cache
 
 # シンボリックリンクの作成
 php artisan storage:link
