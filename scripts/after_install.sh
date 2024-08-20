@@ -51,5 +51,8 @@ php artisan config:cache
 # ルートのキャッシュ
 php artisan route:cache
 
+sudo systemctl restart nginx
+sudo systemctl restart php-fpm
+
 # アプリケーション全体の最適化
 php artisan optimize
