@@ -23,6 +23,10 @@ sudo chmod -R 775 storage bootstrap/cache
 sudo chown -R ec2-user:www-data storage bootstrap/cache
 echo "Directories created and permissions set" >> $LOGFILE
 
+mkdir -p /var/www/MBTI-Diagnosis-App/vendor
+sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/vendor
+sudo chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/vendor
+
 # vendor フォルダの存在を確認
 if [ -d "vendor" ]; then
   echo "Vendor directory exists before cache clear" >> $LOGFILE
