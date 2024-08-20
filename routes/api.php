@@ -1,13 +1,6 @@
 <?php
 
-use Illuminate\Routing\Route;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
-// JSONレスポンスを返すルート
-Route::get('/api/data', function () {
-    return response()->json(['message' => 'Hello, API!!!!!!!!!!']);
-});
-
-Route::get('/user', function (Request $request) {
-    return response()->json(['name' => 'John Doe']);
-});
+Route::apiResource('todos', \App\Http\Controllers\Api\TodoController::class);
