@@ -27,15 +27,16 @@ sudo touch /var/www/MBTI-Diagnosis-App/storage/logs/laravel.log
 sudo chown ec2-user:nginx /var/www/MBTI-Diagnosis-App/storage/logs/laravel.log
 sudo chmod 664 /var/www/MBTI-Diagnosis-App/storage/logs/laravel.log
 
-
 sudo mkdir -p /var/www/MBTI-Diagnosis-App/storage/logs
 sudo chown -R ec2-user:nginx /var/www/MBTI-Diagnosis-App/storage
 sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/storage
 
-
 mkdir -p /var/www/MBTI-Diagnosis-App/vendor
 sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/vendor
 sudo chown -R ec2-user:nginx /var/www/MBTI-Diagnosis-App/vendor
+
+chmod 664 /var/www/MBTI-Diagnosis-App/database/database.sqlite
+chown ec2-user:nginx /var/www/MBTI-Diagnosis-App/database/database.sqlite
 
 # vendor フォルダの存在を確認
 if [ -d "vendor" ]; then
