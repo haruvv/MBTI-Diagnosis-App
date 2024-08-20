@@ -1,17 +1,32 @@
 #!/bin/bash
 set -e
 
-# デプロイディレクトリに移動
+# デバッグ情報の出力
+echo "Current directory: $(pwd)"
+echo "List of files in current directory:"
+ls -la
+
+# アプリケーションディレクトリに移動
 cd /var/www/MBTI-Diagnosis-App
+echo "Changed to application directory: $(pwd)"
 
 # Composerのインストール（もし入っていない場合）
 if ! [ -x "$(command -v composer)" ]; then
+  echo "Installing Composer..."
   curl -sS https://getcomposer.org/installer | php
-  mv composer.phar /usr/local/bin/composer
+  sudo mv composer.phar /usr/local/bin/composer
+  sudo chmod +x /usr/local/bin/composer
 fi
 
-# Composerの依存関係をインストール
-composer install --no-interaction --no-dev --prefer-dist
+# Composerのバージョン確認
+composer --version
+
+# 環境変数の確認
+echo "PATH: $PATH"
+echo "Composer command location: $(which composer)"
+
+# Composer依存関係のインストール
+composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # アプリケーション全体の所有権とパーミッションの確認
 chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App
