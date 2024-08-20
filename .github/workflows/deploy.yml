@@ -95,8 +95,9 @@ jobs:
             ]' \
             --output text
 
-      - name: Debug
+      - name: Create CodeDeploy Deployment
         run: |
-          echo "GitHub Ref: ${{ github.ref }}"
-          echo "GitHub Actor: ${{ github.actor }}"
-          echo "GitHub Repository: ${{ github.repository }}"
+          aws deploy create-deployment \
+            --application-name MBTI-App \
+            --deployment-group-name MBTI-Deploy-Group \
+            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
