@@ -3,37 +3,30 @@
 # デプロイディレクトリに移動
 cd /var/www/MBTI-Diagnosis-App
 
+# アプリケーション全体の所有権とパーミッションの確認
+chown -R nginx:nginx /var/www/MBTI-Diagnosis-App
+chmod -R 775 /var/www/MBTI-Diagnosis-App
+
 # 必要なディレクトリを作成し、権限を設定
 mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 chown -R nginx:nginx storage bootstrap/cache
 
-# 必要なディレクトリとファイルに権限を設定
-chown -R nginx:nginx storage bootstrap/cache
-chmod -R 775 storage bootstrap/cache
-
-sudo chown -R nginx:nginx /var/www/MBTI-Diagnosis-App/storage/logs
-sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/storage/logs
-
-sudo chown -R nginx:nginx /var/www/MBTI-Diagnosis-App/database
-sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/database
-
-# COMPOSER_ALLOW_SUPERUSERを設定してComposerを実行
-export COMPOSER_ALLOW_SUPERUSER=1
-composer install --no-interaction --no-dev --prefer-dist
-
-# 環境設定
-cp .env.example .env
-php artisan key:generate
-
-# データベースマイグレーション（必要な場合）
-php artisan migrate --force
+chown -R nginx:nginx /var/www/MBTI-Diagnosis-App/storage/logs
+chmod -R 775 /var/www/MBTI-Diagnosis-App/storage/logs
+chown -R nginx:nginx /var/www/MBTI-Diagnosis-App/database
+chmod -R 775 /var/www/MBTI-Diagnosis-App/database
 
 # キャッシュのクリア
 php artisan config:clear
 php artisan cache:clear
 php artisan route:clear
 php artisan view:clear
+
+# キャッシュのリロード
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 
 # シンボリックリンクの作成
 php artisan storage:link
@@ -46,9 +39,6 @@ php artisan route:cache
 
 # ビューのキャッシュ
 php artisan view:cache
-
-# Composerのオートロードを最適化
-composer dump-autoload --optimize
 
 # アプリケーション全体の最適化
 php artisan optimize
