@@ -1,0 +1,103 @@
+name: Deploy MBTI-App to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  APP_NAME: MBTI-App
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_URL: http://35.74.145.129/
+  APP_TIMEZONE: Asia/Tokyo
+  APP_LOCALE: ja
+  APP_FALLBACK_LOCALE: en
+  APP_FAKER_LOCALE: ja_JP
+  LOG_CHANNEL: stack
+  LOG_LEVEL: error
+  BROADCAST_CONNECTION: log
+  FILESYSTEM_DISK: local
+  QUEUE_CONNECTION: database
+  CACHE_STORE: database
+  MAIL_MAILER: log
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+
+      - name: Install Composer Dependencies
+        run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Create .env file
+        run: |
+          echo "APP_NAME=${{ env.APP_NAME }}" >> .env
+          echo "APP_ENV=${{ env.APP_ENV }}" >> .env
+          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
+          echo "APP_DEBUG=${{ env.APP_DEBUG }}" >> .env
+          echo "APP_URL=${{ env.APP_URL }}" >> .env
+          echo "APP_TIMEZONE=${{ env.APP_TIMEZONE }}" >> .env
+          echo "APP_LOCALE=${{ env.APP_LOCALE }}" >> .env
+          echo "APP_FALLBACK_LOCALE=${{ env.APP_FALLBACK_LOCALE }}" >> .env
+          echo "APP_FAKER_LOCALE=${{ env.APP_FAKER_LOCALE }}" >> .env
+          echo "LOG_CHANNEL=${{ env.LOG_CHANNEL }}" >> .env
+          echo "LOG_LEVEL=${{ env.LOG_LEVEL }}" >> .env
+          echo "BROADCAST_CONNECTION=${{ env.BROADCAST_CONNECTION }}" >> .env
+          echo "FILESYSTEM_DISK=${{ env.FILESYSTEM_DISK }}" >> .env
+          echo "QUEUE_CONNECTION=${{ env.QUEUE_CONNECTION }}" >> .env
+          echo "CACHE_STORE=${{ env.CACHE_STORE }}" >> .env
+          echo "MAIL_MAILER=${{ env.MAIL_MAILER }}" >> .env
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "SUPABASE_API_KEY=${{ secrets.SUPABASE_API_KEY }}" >> .env
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+
+      - name: Deploy .env file to EC2
+        run: |
+          aws ssm send-command \
+            --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands='[
+              "cat .env > /var/www/MBTI-Diagnosis-App/.env",
+              "chown www-data:www-data /var/www/MBTI-Diagnosis-App/.env",
+              "chmod 600 /var/www/MBTI-Diagnosis-App/.env"
+            ]' \
+            --output text
+
+      - name: Deploy application
+        run: |
+          aws ssm send-command \
+            --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands='[
+              "cd /var/www/MBTI-Diagnosis-App",
+              "git pull origin main",
+              "composer install --no-interaction --prefer-dist --optimize-autoloader",
+              "php artisan migrate --force",
+              "php artisan config:cache",
+              "php artisan route:cache",
+              "php artisan view:cache",
+              "sudo systemctl restart php-fpm",
+              "sudo systemctl restart nginx"
+            ]' \
+            --output text
+
+      - name: Create CodeDeploy Deployment
+        run: |
+          aws deploy create-deployment \
+            --application-name MBTI-App \
+            --deployment-group-name MBTI-Deploy-Group \
+            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
