@@ -5,7 +5,7 @@ use Illuminate\Http\Request;
 
 // JSONレスポンスを返すルート
 Route::get('/api/data', function () {
-    return response()->json(['message' => 'Hello, API!!!!!!!']);
+    return response()->json(['message' => 'Hello, API!!!']);
 });
 
 Route::get('/user', function (Request $request) {
