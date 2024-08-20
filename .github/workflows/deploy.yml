@@ -70,11 +70,11 @@ jobs:
           aws ssm send-command \
             --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
             --document-name "AWS-RunShellScript" \
-            --parameters commands=[
-              "echo '$(cat .env)' > /var/www/MBTI-Diagnosis-App/.env",
+            --parameters commands='[
+              "echo \x27$(cat .env)\x27 > /var/www/MBTI-Diagnosis-App/.env",
               "chown www-data:www-data /var/www/MBTI-Diagnosis-App/.env",
               "chmod 600 /var/www/MBTI-Diagnosis-App/.env"
-            ] \
+            ]' \
             --output text
 
       - name: Deploy application
@@ -82,7 +82,7 @@ jobs:
           aws ssm send-command \
             --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
             --document-name "AWS-RunShellScript" \
-            --parameters commands=[
+            --parameters commands='[
               "cd /var/www/MBTI-Diagnosis-App",
               "git pull origin main",
               "composer install --no-interaction --prefer-dist --optimize-autoloader",
@@ -92,8 +92,9 @@ jobs:
               "php artisan view:cache",
               "sudo systemctl restart php-fpm",
               "sudo systemctl restart nginx"
-            ] \
+            ]' \
             --output text
+
       - name: Debug
         run: |
           echo "GitHub Ref: ${{ github.ref }}"
