@@ -9,33 +9,33 @@ cd /var/www/MBTI-Diagnosis-App
 echo "Moved to deployment directory" >> $LOGFILE
 
 # Composerの依存関係をインストール
-composer install --no-interaction --no-dev --prefer-dist
+composer install --no-interaction --no-dev --prefer-dist >> $LOGFILE 2>&1
 echo "Composer install completed" >> $LOGFILE
 
 # アプリケーション全体の所有権とパーミッションの確認
-sudo chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App
+sudo chown -R ec2-user:nginx /var/www/MBTI-Diagnosis-App
 sudo chmod -R 775 /var/www/MBTI-Diagnosis-App
 echo "Ownership and permissions set" >> $LOGFILE
 
 # 必要なディレクトリを作成し、権限を設定
 mkdir -p bootstrap/cache
 sudo chmod -R 775 storage bootstrap/cache
-sudo chown -R ec2-user:www-data storage bootstrap/cache
+sudo chown -R ec2-user:nginx storage bootstrap/cache
 echo "Directories created and permissions set" >> $LOGFILE
 
 sudo touch /var/www/MBTI-Diagnosis-App/storage/logs/laravel.log
-sudo chown ec2-user:www-data /var/www/MBTI-Diagnosis-App/storage/logs/laravel.log
+sudo chown ec2-user:nginx /var/www/MBTI-Diagnosis-App/storage/logs/laravel.log
 sudo chmod 664 /var/www/MBTI-Diagnosis-App/storage/logs/laravel.log
 
 
 sudo mkdir -p /var/www/MBTI-Diagnosis-App/storage/logs
-sudo chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/storage
+sudo chown -R ec2-user:nginx /var/www/MBTI-Diagnosis-App/storage
 sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/storage
 
 
 mkdir -p /var/www/MBTI-Diagnosis-App/vendor
 sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/vendor
-sudo chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/vendor
+sudo chown -R ec2-user:nginx /var/www/MBTI-Diagnosis-App/vendor
 
 # vendor フォルダの存在を確認
 if [ -d "vendor" ]; then
