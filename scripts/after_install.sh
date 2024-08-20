@@ -34,10 +34,12 @@ chmod -R 775 /var/www/MBTI-Diagnosis-App/database
 php artisan config:clear
 php artisan cache:clear
 php artisan route:clear
+php artisan view:clear
 
 # キャッシュのリロード
 php artisan config:cache
 php artisan route:cache
+php artisan view:cache
 
 # シンボリックリンクの作成
 php artisan storage:link
