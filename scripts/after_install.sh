@@ -18,6 +18,7 @@ chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/bootstrap/cache
 mkdir -p /var/www/MBTI-Diagnosis-App/storage/framework/views
 chmod -R 775 /var/www/MBTI-Diagnosis-App/storage/framework/views
 chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/storage/framework/views
+sudo find /var/www/MBTI-Diagnosis-App/storage/framework/views -type f -exec chmod 775 {} \;
 
 # 権限の設定
 chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/vendor
