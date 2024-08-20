@@ -3,17 +3,18 @@
 # デプロイディレクトリに移動
 cd /var/www/MBTI-Diagnosis-App
 
-# Composerの依存関係をインストール
-composer install --no-interaction --no-dev --prefer-dist
-
 # アプリケーション全体の所有権とパーミッションの確認
 chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App
 chmod -R 775 /var/www/MBTI-Diagnosis-App
 
 # 必要なディレクトリを作成し、権限を設定
-mkdir -p bootstrap/cache
-chmod -R 775 storage bootstrap/cache
-chown -R ec2-user:www-data storage bootstrap/cache
+mkdir -p /var/www/MBTI-Diagnosis-App/bootstrap/cache
+chmod -R 775 /var/www/MBTI-Diagnosis-App/bootstrap/cache
+chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/bootstrap/cache
+
+mkdir -p /var/www/MBTI-Diagnosis-App/storage/framework/views
+chmod -R 775 /var/www/MBTI-Diagnosis-App/storage/framework/views
+chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/storage/framework/views
 
 # 権限の設定
 chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/vendor
@@ -25,6 +26,9 @@ sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/storage
 
 chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/database
 chmod -R 775 /var/www/MBTI-Diagnosis-App/database
+
+# Composerの依存関係をインストール
+sudo -u ec2-user composer install --no-interaction --no-dev --prefer-dist
 
 # キャッシュのクリア
 php artisan config:clear
