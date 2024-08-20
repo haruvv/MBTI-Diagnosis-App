@@ -7,28 +7,29 @@ cd /var/www/MBTI-Diagnosis-App
 composer install --no-interaction --no-dev --prefer-dist
 
 # アプリケーション全体の所有権とパーミッションの確認
-chown -R nginx:nginx /var/www/MBTI-Diagnosis-App
+chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App
 chmod -R 775 /var/www/MBTI-Diagnosis-App
 
 # 必要なディレクトリを作成し、権限を設定
 mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
-chown -R nginx:nginx storage bootstrap/cache
+chown -R ec2-user:www-data storage bootstrap/cache
 
 # 権限の設定
-chown -R nginx:nginx /var/www/MBTI-Diagnosis-App/vendor
+chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/vendor
 chmod -R 755 /var/www/MBTI-Diagnosis-App/vendor
 
-chown -R nginx:nginx /var/www/MBTI-Diagnosis-App/storage/logs
-chmod -R 775 /var/www/MBTI-Diagnosis-App/storage/logs
-chown -R nginx:nginx /var/www/MBTI-Diagnosis-App/database
+# ストレージディレクトリとキャッシュディレクトリの権限を設定
+sudo chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/storage
+sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/storage
+
+chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/database
 chmod -R 775 /var/www/MBTI-Diagnosis-App/database
 
 # キャッシュのクリア
 php artisan config:clear
 php artisan cache:clear
 php artisan route:clear
-php artisan view:clear
 
 # キャッシュのリロード
 php artisan config:cache
@@ -43,9 +44,6 @@ php artisan config:cache
 
 # ルートのキャッシュ
 php artisan route:cache
-
-# ビューのキャッシュ
-php artisan view:cache
 
 # アプリケーション全体の最適化
 php artisan optimize
