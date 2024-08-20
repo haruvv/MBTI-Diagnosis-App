@@ -59,39 +59,37 @@ jobs:
           echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-1
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Transfer files to EC2
-        env:
-          PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          HOST_NAME: ${{ secrets.EC2_HOST_NAME }}
-          USER_NAME: ${{ secrets.EC2_USER_NAME }}
+      - name: Deploy .env file to EC2
         run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          scp -i private_key -o StrictHostKeyChecking=no -r ./* ${USER_NAME}@${HOST_NAME}:/var/www/MBTI-Diagnosis-App/
-          scp -i private_key -o StrictHostKeyChecking=no .env ${USER_NAME}@${HOST_NAME}:/var/www/MBTI-Diagnosis-App/.env
+          aws ssm send-command \
+            --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands=[
+              "echo '$(cat .env)' > /var/www/MBTI-Diagnosis-App/.env",
+              "chown www-data:www-data /var/www/MBTI-Diagnosis-App/.env",
+              "chmod 600 /var/www/MBTI-Diagnosis-App/.env"
+            ] \
+            --output text
 
       - name: Deploy application
-        env:
-          PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-          HOST_NAME: ${{ secrets.EC2_HOST_NAME }}
-          USER_NAME: ${{ secrets.EC2_USER_NAME }}
         run: |
-          ssh -i private_key -o StrictHostKeyChecking=no ${USER_NAME}@${HOST_NAME} '
-            cd /var/www/MBTI-Diagnosis-App &&
-            composer install --no-interaction --prefer-dist --optimize-autoloader &&
-            php artisan migrate --force &&
-            php artisan config:cache &&
-            php artisan route:cache &&
-            php artisan view:cache &&
-            sudo systemctl restart php-fpm &&
-            sudo systemctl restart nginx
-          '
-
-      - name: Clean up
-        if: always()
-        run: rm -f private_key
+          aws ssm send-command \
+            --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands=[
+              "cd /var/www/MBTI-Diagnosis-App",
+              "git pull origin main",
+              "composer install --no-interaction --prefer-dist --optimize-autoloader",
+              "php artisan migrate --force",
+              "php artisan config:cache",
+              "php artisan route:cache",
+              "php artisan view:cache",
+              "sudo systemctl restart php-fpm",
+              "sudo systemctl restart nginx"
+            ] \
+            --output text
