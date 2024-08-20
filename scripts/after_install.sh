@@ -3,6 +3,9 @@
 # デプロイディレクトリに移動
 cd /var/www/MBTI-Diagnosis-App
 
+# Composerの依存関係をインストール
+composer install --no-interaction --no-dev --prefer-dist
+
 # アプリケーション全体の所有権とパーミッションの確認
 chown -R nginx:nginx /var/www/MBTI-Diagnosis-App
 chmod -R 775 /var/www/MBTI-Diagnosis-App
@@ -11,6 +14,10 @@ chmod -R 775 /var/www/MBTI-Diagnosis-App
 mkdir -p bootstrap/cache
 chmod -R 775 storage bootstrap/cache
 chown -R nginx:nginx storage bootstrap/cache
+
+# 権限の設定
+chown -R nginx:nginx /var/www/MBTI-Diagnosis-App/vendor
+chmod -R 755 /var/www/MBTI-Diagnosis-App/vendor
 
 chown -R nginx:nginx /var/www/MBTI-Diagnosis-App/storage/logs
 chmod -R 775 /var/www/MBTI-Diagnosis-App/storage/logs
