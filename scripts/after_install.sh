@@ -11,22 +11,32 @@ cd /var/www/MBTI-Diagnosis-App
 echo "Changed to application directory: $(pwd)"
 
 # Composerのインストール（もし入っていない場合）
-if ! [ -x "$(command -v composer)" ]; then
+if [ ! -f "composer.phar" ]; then
   echo "Installing Composer..."
   curl -sS https://getcomposer.org/installer | php
-  sudo mv composer.phar /usr/local/bin/composer
-  sudo chmod +x /usr/local/bin/composer
+  chmod +x composer.phar
+  echo "Composer installed successfully."
+else
+  echo "Composer already installed."
+fi
+
+# Composerの存在確認
+if [ ! -f "composer.phar" ]; then
+  echo "Error: composer.phar not found!"
+  exit 1
 fi
 
 # Composerのバージョン確認
-composer --version
+echo "Checking Composer version:"
+php composer.phar --version
 
 # 環境変数の確認
 echo "PATH: $PATH"
-echo "Composer command location: $(which composer)"
+echo "PHP version: $(php -v)"
 
 # Composer依存関係のインストール
-composer install --no-interaction --prefer-dist --optimize-autoloader
+echo "Installing Composer dependencies..."
+php composer.phar install --no-interaction --prefer-dist --optimize-autoloader
 
 # アプリケーション全体の所有権とパーミッションの確認
 chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App
