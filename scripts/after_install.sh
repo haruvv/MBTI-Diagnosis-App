@@ -23,6 +23,16 @@ sudo chmod -R 775 storage bootstrap/cache
 sudo chown -R ec2-user:www-data storage bootstrap/cache
 echo "Directories created and permissions set" >> $LOGFILE
 
+sudo touch /var/www/MBTI-Diagnosis-App/storage/logs/laravel.log
+sudo chown ec2-user:www-data /var/www/MBTI-Diagnosis-App/storage/logs/laravel.log
+sudo chmod 664 /var/www/MBTI-Diagnosis-App/storage/logs/laravel.log
+
+
+sudo mkdir -p /var/www/MBTI-Diagnosis-App/storage/logs
+sudo chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/storage
+sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/storage
+
+
 mkdir -p /var/www/MBTI-Diagnosis-App/vendor
 sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/vendor
 sudo chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/vendor
@@ -61,6 +71,9 @@ echo "Storage link created" >> $LOGFILE
 php artisan config:cache
 php artisan route:cache
 echo "Config and route cache completed" >> $LOGFILE
+
+sudo systemctl restart php-fpm
+sudo systemctl restart nginx
 
 # アプリケーション全体の最適化
 php artisan optimize
