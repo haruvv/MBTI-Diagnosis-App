@@ -4,7 +4,7 @@
 cd /var/www/MBTI-Diagnosis-App
 
 # Composerの依存関係をインストール
-sudo -u ec2-user composer install --no-interaction --no-dev --prefer-dist
+composer install --no-interaction --no-dev --prefer-dist
 
 # アプリケーション全体の所有権とパーミッションの確認
 chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App
