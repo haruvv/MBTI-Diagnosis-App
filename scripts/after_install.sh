@@ -38,6 +38,26 @@ echo "PHP version: $(php -v)"
 echo "Installing Composer dependencies..."
 php composer.phar install --no-interaction --prefer-dist --optimize-autoloader
 
+# キャッシュのクリア
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+
+# キャッシュのリロード
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# シンボリックリンクの作成
+php artisan storage:link
+
+# 設定のキャッシュ
+php artisan config:cache
+
+# ルートのキャッシュ
+php artisan route:cache
+
 # アプリケーション全体の所有権とパーミッションの確認
 chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App
 chmod -R 775 /var/www/MBTI-Diagnosis-App
@@ -62,26 +82,6 @@ sudo chmod -R 775 /var/www/MBTI-Diagnosis-App/storage
 
 chown -R ec2-user:www-data /var/www/MBTI-Diagnosis-App/database
 chmod -R 775 /var/www/MBTI-Diagnosis-App/database
-
-# キャッシュのクリア
-php artisan config:clear
-php artisan cache:clear
-php artisan route:clear
-php artisan view:clear
-
-# キャッシュのリロード
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-
-# シンボリックリンクの作成
-php artisan storage:link
-
-# 設定のキャッシュ
-php artisan config:cache
-
-# ルートのキャッシュ
-php artisan route:cache
 
 sudo systemctl restart nginx
 sudo systemctl restart php-fpm
