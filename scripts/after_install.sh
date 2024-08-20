@@ -1,7 +1,14 @@
 #!/bin/bash
+set -e
 
 # デプロイディレクトリに移動
 cd /var/www/MBTI-Diagnosis-App
+
+# Composerのインストール（もし入っていない場合）
+if ! [ -x "$(command -v composer)" ]; then
+  curl -sS https://getcomposer.org/installer | php
+  mv composer.phar /usr/local/bin/composer
+fi
 
 # Composerの依存関係をインストール
 composer install --no-interaction --no-dev --prefer-dist
@@ -56,3 +63,5 @@ sudo systemctl restart php-fpm
 
 # アプリケーション全体の最適化
 php artisan optimize
+
+echo "Deployment completed successfully!"
