@@ -93,3 +93,8 @@ jobs:
               "sudo systemctl restart nginx"
             ] \
             --output text
+      - name: Debug
+        run: |
+          echo "GitHub Ref: ${{ github.ref }}"
+          echo "GitHub Actor: ${{ github.actor }}"
+          echo "GitHub Repository: ${{ github.repository }}"
