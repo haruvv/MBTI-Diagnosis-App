@@ -38,6 +38,10 @@ sudo chown -R ec2-user:nginx /var/www/MBTI-Diagnosis-App/vendor
 chmod 664 /var/www/MBTI-Diagnosis-App/database/database.sqlite
 chown ec2-user:nginx /var/www/MBTI-Diagnosis-App/database/database.sqlite
 
+touch /var/www/MBTI-Diagnosis-App/database/database.sqlite
+chmod 664 /var/www/MBTI-Diagnosis-App/database/database.sqlite
+chown www-data:www-data /var/www/MBTI-Diagnosis-App/database/database.sqlite
+
 # vendor フォルダの存在を確認
 if [ -d "vendor" ]; then
   echo "Vendor directory exists before cache clear" >> $LOGFILE
