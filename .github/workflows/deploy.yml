@@ -1,0 +1,177 @@
+name: CI/CD for MBTI-App
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  APP_NAME: MBTI-App
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_URL: http://35.74.145.129/
+  APP_TIMEZONE: Asia/Tokyo
+  APP_LOCALE: ja
+  APP_FALLBACK_LOCALE: en
+  APP_FAKER_LOCALE: ja_JP
+  LOG_CHANNEL: stack
+  LOG_LEVEL: error
+  BROADCAST_CONNECTION: log
+  FILESYSTEM_DISK: local
+  QUEUE_CONNECTION: database
+  CACHE_STORE: database
+  MAIL_MAILER: log
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+
+      - name: Create necessary directories and set permissions
+        run: |
+          mkdir -p bootstrap/cache
+          chmod -R 775 bootstrap/cache
+          mkdir -p storage/framework/{sessions,views,cache}
+          chmod -R 775 storage
+
+      - name: Install Composer Dependencies
+        run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Install PHPStan and PHP_CodeSniffer if not present
+        run: |
+          composer require --dev phpstan/phpstan
+          composer require --dev squizlabs/php_codesniffer
+
+      - name: Create .env file for testing
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run tests
+        run: php artisan test
+
+      - name: Run PHPStan
+        run: ./vendor/bin/phpstan analyse app tests
+
+      - name: Run PHP_CodeSniffer
+        run: ./vendor/bin/phpcs --standard=phpcs.xml
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+
+      - name: Create necessary directories and set permissions
+        run: |
+          mkdir -p bootstrap/cache
+          chmod -R 775 bootstrap/cache
+          mkdir -p storage/framework/{sessions,views,cache}
+          chmod -R 775 storage
+
+      - name: Install Composer Dependencies
+        run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+      - name: Create .env file
+        run: |
+          cat << EOF > .env
+          APP_NAME="${{ env.APP_NAME }}"
+          APP_ENV="${{ env.APP_ENV }}"
+          APP_KEY="${{ secrets.APP_KEY }}"
+          APP_DEBUG="${{ env.APP_DEBUG }}"
+          APP_URL="${{ env.APP_URL }}"
+          APP_TIMEZONE="${{ env.APP_TIMEZONE }}"
+          APP_LOCALE="${{ env.APP_LOCALE }}"
+          APP_FALLBACK_LOCALE="${{ env.APP_FALLBACK_LOCALE }}"
+          APP_FAKER_LOCALE="${{ env.APP_FAKER_LOCALE }}"
+          LOG_CHANNEL="${{ env.LOG_CHANNEL }}"
+          LOG_LEVEL="${{ env.LOG_LEVEL }}"
+          BROADCAST_CONNECTION="${{ env.BROADCAST_CONNECTION }}"
+          FILESYSTEM_DISK="${{ env.FILESYSTEM_DISK }}"
+          QUEUE_CONNECTION="${{ env.QUEUE_CONNECTION }}"
+          CACHE_STORE="${{ env.CACHE_STORE }}"
+          MAIL_MAILER="${{ env.MAIL_MAILER }}"
+          SUPABASE_URL="${{ secrets.SUPABASE_URL }}"
+          SUPABASE_API_KEY="${{ secrets.SUPABASE_API_KEY }}"
+          SUPABASE_SERVICE_ROLE_KEY="${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}"
+          EOF
+
+      - name: Display .env file content (for debugging)
+        run: cat .env
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+
+      - name: Deploy .env file to EC2
+        run: |
+          aws ssm send-command \
+            --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands='[
+              "cat << EOF > /var/www/MBTI-Diagnosis-App/.env
+          APP_NAME=\"${{ env.APP_NAME }}\"
+          APP_ENV=\"${{ env.APP_ENV }}\"
+          APP_KEY=\"${{ secrets.APP_KEY }}\"
+          APP_DEBUG=\"${{ env.APP_DEBUG }}\"
+          APP_URL=\"${{ env.APP_URL }}\"
+          APP_TIMEZONE=\"${{ env.APP_TIMEZONE }}\"
+          APP_LOCALE=\"${{ env.APP_LOCALE }}\"
+          APP_FALLBACK_LOCALE=\"${{ env.APP_FALLBACK_LOCALE }}\"
+          APP_FAKER_LOCALE=\"${{ env.APP_FAKER_LOCALE }}\"
+          LOG_CHANNEL=\"${{ env.LOG_CHANNEL }}\"
+          LOG_LEVEL=\"${{ env.LOG_LEVEL }}\"
+          BROADCAST_CONNECTION=\"${{ env.BROADCAST_CONNECTION }}\"
+          FILESYSTEM_DISK=\"${{ env.FILESYSTEM_DISK }}\"
+          QUEUE_CONNECTION=\"${{ env.QUEUE_CONNECTION }}\"
+          CACHE_STORE=\"${{ env.CACHE_STORE }}\"
+          MAIL_MAILER=\"${{ env.MAIL_MAILER }}\"
+          SUPABASE_URL=\"${{ secrets.SUPABASE_URL }}\"
+          SUPABASE_API_KEY=\"${{ secrets.SUPABASE_API_KEY }}\"
+          SUPABASE_SERVICE_ROLE_KEY=\"${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}\"
+          EOF",
+              "chown www-data:www-data /var/www/MBTI-Diagnosis-App/.env",
+              "chmod 600 /var/www/MBTI-Diagnosis-App/.env"
+            ]' \
+            --output text
+
+      - name: Deploy application
+        run: |
+          aws ssm send-command \
+            --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands='[
+              "cd /var/www/MBTI-Diagnosis-App",
+              "git pull origin main",
+              "composer install --no-interaction --prefer-dist --optimize-autoloader",
+              "php artisan migrate --force",
+              "php artisan config:cache",
+              "php artisan route:cache",
+              "php artisan view:cache",
+              "sudo systemctl restart php-fpm",
+              "sudo systemctl restart nginx"
+            ]' \
+            --output text
+
+      - name: Create CodeDeploy Deployment
+        run: |
+          aws deploy create-deployment \
+            --application-name MBTI-App \
+            --deployment-group-name MBTI-Deploy-Group \
+            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
